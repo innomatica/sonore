@@ -1,0 +1,30 @@
+{
+    "version": 1,
+    "createdAt": "2022-10-09 12:12:00.000Z",
+    "data": [
+        {
+            "uuid": "871abc60-a5c2-459a-8294-b615f7b153b8",
+            "url": "http://live-icy.dr.dk/A/A04H.mp3.m3u",
+            "homepage": "http://www.dr.dk/lyd/p2",
+            "name": "DR P2",
+            "country": "Denmark",
+            "language": "danish",
+            "tags": "classical",
+            "bitrate": 320
+        },
+        {
+            "uuid": "f4562879-908f-4dc8-8908-d6c78b238e69",
+            "url": "http://peacefulpiano.stream.publicradio.org/peacefulpiano.mp3",
+            "homepage": "https://www.yourclassical.org/",
+            "name": "Your Classical - Peaceful Piano",
+            "country": "US",
+            "language": "english",
+            "tags": "classical",
+            "bitrate": 128
+        },
+        {
+            "uuid": "9621df06-0601-11e8-ae97-52543be04c81",
+            "url": null
+        }
+    ]
+}
