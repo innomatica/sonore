@@ -46,7 +46,7 @@ dependencies:
   path_provider: ^2.0.15
   shared_preferences: ^2.1.2
   dynamic_color: ^1.6.5
-  http: ^0.13.6
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
