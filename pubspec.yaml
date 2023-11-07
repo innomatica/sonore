@@ -39,7 +39,6 @@ dependencies:
   country_code: ^1.0.0
   url_launcher: ^6.1.11
   just_audio: ^0.9.34
-  just_audio_background: ^0.0.1-beta.10
   provider: ^6.0.5
   path: ^1.8.3
   sqflite: ^2.2.8+4
@@ -47,6 +46,7 @@ dependencies:
   shared_preferences: ^2.1.2
   dynamic_color: ^1.6.5
   http: ^1.1.0
+  audio_service: ^0.18.12
 
 dev_dependencies:
   flutter_test:

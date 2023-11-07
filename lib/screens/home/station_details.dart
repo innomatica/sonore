@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sonoreapp/services/audiohandler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../logic/station.dart';
 import '../../models/station.dart';
-import '../../services/radio_player.dart';
 import '../../services/station_api.dart';
 import '../../shared/constants.dart';
 import '../../shared/helpers.dart';
@@ -46,13 +46,14 @@ class _StationDetailsState extends State<StationDetails> {
   // Delete Button
   //
   Widget _buildDeleteButton() {
-    final player = context.read<RadioPlayer>();
+    final handler = context.read<SonoreAudioHandler>();
     final bloc = context.read<StationBloc>();
     return TextButton.icon(
       onPressed: () async {
         // stop playing if necessary
-        if (player.isPlaying && player.currentUuid == widget.station.uuid) {
-          player.pause();
+        if (handler.playbackState.value.playing &&
+            handler.currentUuid == widget.station.uuid) {
+          handler.pause();
         }
         bloc
             .deleteStation(widget.station)
@@ -173,18 +174,18 @@ class _StationDetailsState extends State<StationDetails> {
   // Player Buttons
   //
   Widget _buildPlayerButtons() {
-    final player = context.watch<RadioPlayer>();
-    final isPlaying =
-        player.currentUuid == widget.station.uuid && player.isPlaying;
+    final handler = context.watch<SonoreAudioHandler>();
+    final isPlaying = handler.currentUuid == widget.station.uuid &&
+        handler.playbackState.value.playing;
     return Column(children: [
       Padding(
         padding: const EdgeInsets.only(top: 20, bottom: 20),
         child: ElevatedButton(
           onPressed: () async {
             if (isPlaying) {
-              await player.pause();
+              await handler.pause();
             } else {
-              await player.playRadioStation(widget.station);
+              await handler.playRadioStation(widget.station);
             }
           },
           style: ElevatedButton.styleFrom(
@@ -234,10 +235,10 @@ class _StationDetailsState extends State<StationDetails> {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Slider(
-          value: player.volume,
+          value: handler.volume,
           onChanged: (value) {
             setState(() {
-              player.setVolume(value);
+              handler.setVolume(value);
             });
           },
         ),

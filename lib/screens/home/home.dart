@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../../logic/station.dart';
 import '../../models/label.dart';
 import '../../models/station.dart';
-import '../../services/radio_player.dart';
+import '../../services/audiohandler.dart';
 import '../../shared/constants.dart';
 import '../../shared/settings.dart';
 import '../about/about.dart';
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
   // Scaffold Action Menu
   //
   Widget _buildActionMenu() {
-    return Consumer<RadioPlayer>(builder: (context, player, _) {
+    return Consumer<SonoreAudioHandler>(builder: (context, player, _) {
       return PopupMenuButton<String>(
         icon: const Icon(Icons.more_vert),
         onSelected: (value) {
@@ -164,11 +164,11 @@ class _HomePageState extends State<HomePage> {
   Widget _buildStationCard(Station station) {
     // debugPrint('station.name: ${station.name}');
     // debugPrint('station.labels: ${station.labels}');
-    final player = context.watch<RadioPlayer>();
+    final handler = context.watch<SonoreAudioHandler>();
     final logic = context.read<StationBloc>();
 
     return Card(
-      elevation: player.currentUuid == station.uuid ? 8 : 0,
+      elevation: handler.currentUuid == station.uuid ? 8 : 0,
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 8),
         onTap: () {
@@ -220,17 +220,18 @@ class _HomePageState extends State<HomePage> {
               ),
 
         // play button
-        trailing: player.currentUuid == station.uuid && player.isPlaying
+        trailing: handler.currentUuid == station.uuid &&
+                handler.playbackState.value.playing
             ? IconButton(
                 icon: const Icon(Icons.pause_rounded, size: 32),
                 onPressed: () async {
-                  await player.pause();
+                  await handler.pause();
                 },
               )
             : IconButton(
                 icon: const Icon(Icons.play_arrow_rounded, size: 32),
                 onPressed: () async {
-                  await player.playRadioStation(station);
+                  await handler.playRadioStation(station);
                 },
               ),
       ),
