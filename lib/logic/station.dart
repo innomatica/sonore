@@ -17,6 +17,7 @@ class StationBloc extends ChangeNotifier {
   List<StationLabel> _labels = <StationLabel>[];
   StationLabel? _currentLabel;
   String? appDocDirPath;
+  String? _currentStationId;
 
   StationBloc() {
     _initBloc();
@@ -31,12 +32,12 @@ class StationBloc extends ChangeNotifier {
     refreshLabels();
   }
 
+  String? get currentStationId => _currentStationId;
+  List<Station> get stations => _stations;
+
   //
   // Station
   //
-  List<Station> get stations {
-    return _stations;
-  }
 
   Future refreshStations() async {
     // get all stations if
@@ -82,6 +83,11 @@ class StationBloc extends ChangeNotifier {
     }
     await _db.deleteStationById(station.uuid);
     refreshStations();
+  }
+
+  void setCurrentStationId(String stationId) {
+    _currentStationId = stationId;
+    notifyListeners();
   }
 
   //

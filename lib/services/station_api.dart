@@ -17,6 +17,8 @@ class StationApiService {
 
   static Future<List<Station>> getTopStations(
       {int count = 100, String type = 'topvote'}) async {
+    // return value
+    final stations = <Station>[];
     final serverIpv4 = await _getRandomizedServerIp();
     final url = Uri(
         scheme: 'http',
@@ -26,25 +28,25 @@ class StationApiService {
     // debugPrint('url:$url');
 
     final res = await http.get(url, headers: {'User-Agent': appId});
-    // list of current stations
-    final current = await _db.getStations();
-    // return value
-    final stations = <Station>[];
-    try {
-      for (final item
-          in jsonDecode(utf8.decode(res.bodyBytes, allowMalformed: true))) {
-        final station = Station.fromRadioBrowserApi(item);
-        // check if you already have the station registered
-        if (current.any((e) => e.uuid == station.uuid)) {
-          // mark the station
-          station.state = 'registered';
+    if (res.statusCode == 200) {
+      // list of current stations
+      final current = await _db.getStations();
+      try {
+        for (final item
+            in jsonDecode(utf8.decode(res.bodyBytes, allowMalformed: true))) {
+          final station = Station.fromRadioBrowserApi(item);
+          // check if you already have the station registered
+          if (current.any((e) => e.uuid == station.uuid)) {
+            // mark the station
+            station.state = 'registered';
+          }
+          stations.add(station);
+          // debugPrint('item: $item');
+          // debugPrint('station: $station');
         }
-        stations.add(station);
-        // debugPrint('item: $item');
-        // debugPrint('station: $station');
+      } catch (e) {
+        debugPrint(e.toString());
       }
-    } catch (e) {
-      debugPrint(e.toString());
     }
     return stations;
   }
@@ -158,5 +160,33 @@ class StationApiService {
       station.info['clickCount'] = station.info['clickCount'] + 1;
       _db.updateStation(station);
     }
+  }
+
+  static Future<List<Station>> getFavoriteStations() async {
+    // return value
+    final stations = <Station>[];
+    // get favorite data
+    final res = await http.get(Uri.parse(urlStationsJson));
+    if (res.statusCode == 200) {
+      // decode data part of the res
+      final data = jsonDecode(res.body)['data'];
+      // debugPrint('data: $data');
+      // validate data
+      if (data is List && data.isNotEmpty == true) {
+        // get stations by UUID list from the data above
+        final results = await getStationByIds(
+            data.map((u) => u["uuid"] as String).toList());
+        // fetch existing stations for the comparison
+        final current = await _db.getStations();
+        for (final result in results) {
+          // mark registered if the station is not new
+          if (current.any((e) => e.uuid == result.uuid)) {
+            result.state = 'registered';
+          }
+          stations.add(result);
+        }
+      }
+    }
+    return stations;
   }
 }

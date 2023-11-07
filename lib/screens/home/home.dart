@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sonoreapp/screens/home/widgets.dart';
+import 'package:sonoreapp/services/station_api.dart';
+import 'package:url_launcher/url_launcher.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../logic/station.dart';
@@ -26,6 +29,41 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Timer? _sleepTimer;
   int _sleepTimeout = sleepTimeouts[0];
+
+  //
+  // Scaffold App Bar
+  //
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Sonore
+          Text(
+            appName,
+            style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.primary),
+          ),
+          const SizedBox(width: 10),
+          // Label
+          Icon(
+            Icons.label_outline_rounded,
+            size: 20,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
+          const SizedBox(width: 5),
+          _buildLabelMenu(context),
+        ],
+      ),
+      actions: [
+        _sleepTimer != null && _sleepTimer!.isActive
+            ? _buildSleepTimerButton()
+            : Container(),
+        _buildActionMenu(),
+      ],
+    );
+  }
 
   //
   // Scaffold Label Menu
@@ -162,13 +200,11 @@ class _HomePageState extends State<HomePage> {
   // Station Card
   //
   Widget _buildStationCard(Station station) {
-    // debugPrint('station.name: ${station.name}');
-    // debugPrint('station.labels: ${station.labels}');
-    final handler = context.watch<SonoreAudioHandler>();
-    final logic = context.read<StationBloc>();
+    final handler = context.read<SonoreAudioHandler>();
+    final logic = context.watch<StationBloc>();
 
     return Card(
-      elevation: handler.currentUuid == station.uuid ? 8 : 0,
+      elevation: logic.currentStationId == station.uuid ? 8 : 0,
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 8),
         onTap: () {
@@ -220,20 +256,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
         // play button
-        trailing: handler.currentUuid == station.uuid &&
-                handler.playbackState.value.playing
-            ? IconButton(
-                icon: const Icon(Icons.pause_rounded, size: 32),
-                onPressed: () async {
-                  await handler.pause();
-                },
-              )
-            : IconButton(
-                icon: const Icon(Icons.play_arrow_rounded, size: 32),
-                onPressed: () async {
-                  await handler.playRadioStation(station);
-                },
-              ),
+        trailing: buildPlayButton(handler, station),
       ),
     );
   }
@@ -272,42 +295,175 @@ class _HomePageState extends State<HomePage> {
           );
   }
 
+  //
+  // Search Dialog
+  //
+  Widget _buildSearchDialog() {
+    final iconColor = Theme.of(context).colorScheme.tertiary;
+    String? keyword;
+    return AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            decoration:
+                const InputDecoration(labelText: 'Enter search keyword'),
+            onChanged: (text) => keyword = text,
+          ),
+          const SizedBox(height: 16.0),
+          TextButton.icon(
+            onPressed: () {
+              if (keyword?.isNotEmpty == true) {
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (context) => _buildSearchResult(
+                      StationApiService.searchStations({
+                    'name': keyword,
+                    'limit': '300',
+                    'hidebroken': 'true',
+                    'bitrateMin': '128'
+                  })),
+                );
+              }
+            },
+            icon: Icon(Icons.search_rounded, color: iconColor),
+            label: const Text('Search By Station Name'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              if (keyword?.isNotEmpty == true) {
+                final params = {
+                  'limit': '300',
+                  'hidebroken': 'true',
+                  'bitrateMin': '128'
+                };
+                if (keyword!.contains(',')) {
+                  params['tagList'] = keyword!;
+                } else {
+                  params['tag'] = keyword!;
+                }
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (context) => _buildSearchResult(
+                      StationApiService.searchStations(params)),
+                );
+              }
+            },
+            icon: Icon(Icons.search_rounded, color: iconColor),
+            label: const Text('Search By Tag(s)'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    _buildSearchResult(StationApiService.getTopStations()),
+              );
+            },
+            icon: Icon(Icons.star_border_rounded, color: iconColor),
+            label: const Text('Top 100 Stations'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    _buildSearchResult(StationApiService.getFavoriteStations()),
+              );
+            },
+            icon: Icon(Icons.favorite_border_rounded, color: iconColor),
+            label: const Text('Sonore Favorites'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              // Navigator.pop(context);
+              Navigator.popAndPushNamed(context, '/map');
+            },
+            icon: Icon(Icons.map_rounded, color: iconColor),
+            label: const Text('Find Station Information'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //
+  // Search Result Dialog
+  //
+  Widget _buildSearchResult(Future<List<Station>> query) {
+    final bloc = context.read<StationBloc>();
+    return AlertDialog(
+      content: SizedBox(
+        width: double.maxFinite,
+        child: FutureBuilder<List<Station>>(
+          future: query,
+          builder: (context, snapshot) => snapshot.hasData
+              ? snapshot.data?.isNotEmpty == true
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: snapshot.data?.length,
+                      itemBuilder: (context, index) => Card(
+                        child: ListTile(
+                          enabled: snapshot.data![index].state != 'registered',
+                          onTap: () => bloc.addStation(snapshot.data![index]),
+                          title: Text(
+                            snapshot.data?[index].name ?? '',
+                          ),
+                          subtitle: Text(
+                            snapshot.data?[index].info['tags'] ?? '',
+                            maxLines: 1,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.tertiary),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const Center(child: Text("No Stations Found"))
+              : const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  //
+  // Floating Action Button
+  //
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: () {},
+      backgroundColor:
+          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
+      child: IconButton(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => _buildSearchDialog(),
+        ),
+        icon: const Icon(Icons.add),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Sonore
-            Text(
-              appName,
-              style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.primary),
-            ),
-            const SizedBox(width: 10),
-            // Label
-            Icon(
-              Icons.label_outline_rounded,
-              size: 20,
-              color: Theme.of(context).colorScheme.tertiary,
-            ),
-            const SizedBox(width: 5),
-            _buildLabelMenu(context),
-          ],
-        ),
-        actions: [
-          _sleepTimer != null && _sleepTimer!.isActive
-              ? _buildSleepTimerButton()
-              : Container(),
-          _buildActionMenu(),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(4.0),
         child: _buildStationList(),
       ),
+      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

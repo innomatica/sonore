@@ -1,5 +1,10 @@
 import 'dart:convert';
 
+import 'package:audio_service/audio_service.dart';
+import 'package:sonoreapp/shared/settings.dart';
+
+import '../shared/constants.dart';
+
 class Station {
   String uuid;
   String name;
@@ -134,6 +139,19 @@ class Station {
       'userData': jsonEncode(userData),
       'labels': labels.join(","),
     };
+  }
+
+  MediaItem toMediaItem() {
+    return MediaItem(
+      id: url,
+      title: name,
+      album: info['tags'],
+      genre: info['tags'],
+      artUri: image.isNotEmpty
+          ? Uri.tryParse(image) ?? Uri.parse(urlDefalutArt)
+          : Uri.parse(urlDefalutArt),
+      extras: {'uuid': uuid, 'bitrate': bitrate},
+    );
   }
 
   @override

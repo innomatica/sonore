@@ -480,6 +480,7 @@ class _StationSearchState extends State<StationSearch> {
                     );
                   }
                 } else {
+                  debugPrint(res.body);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text('failed to connect to the server')));
