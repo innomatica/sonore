@@ -11,10 +11,7 @@ import '../../shared/helpers.dart';
 
 class StationDetails extends StatefulWidget {
   final Station station;
-  const StationDetails({
-    required this.station,
-    Key? key,
-  }) : super(key: key);
+  const StationDetails({required this.station, super.key});
 
   @override
   State<StationDetails> createState() => _StationDetailsState();

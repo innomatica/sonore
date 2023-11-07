@@ -6,7 +6,7 @@ import '../../logic/station.dart';
 import '../../models/label.dart';
 
 class LabelManager extends StatefulWidget {
-  const LabelManager({Key? key}) : super(key: key);
+  const LabelManager({super.key});
 
   @override
   State<LabelManager> createState() => _LabelManagerState();

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Instruction: Start
 //
 class FirstTime extends StatelessWidget {
-  const FirstTime({Key? key}) : super(key: key);
+  const FirstTime({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class FirstTime extends StatelessWidget {
 // Instruction: No Stations for the label
 //
 class EmptyList extends StatelessWidget {
-  const EmptyList({Key? key}) : super(key: key);
+  const EmptyList({super.key});
 
   @override
   Widget build(BuildContext context) {

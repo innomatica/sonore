@@ -14,7 +14,7 @@ import '../../services/station_api.dart';
 import '../../shared/helpers.dart';
 
 class StationSearch extends StatefulWidget {
-  const StationSearch({Key? key}) : super(key: key);
+  const StationSearch({super.key});
 
   @override
   State<StationSearch> createState() => _StationSearchState();
