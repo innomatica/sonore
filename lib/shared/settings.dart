@@ -2,8 +2,9 @@
 const urlServersRadioBrowser = 'all.api.radio-browser.info';
 const urlInfoRadioBroswer = 'https://radio-browser.info';
 const urlMapRadioBrowser = 'https://www.radio-browser.info/map';
-const urlPrivacyPolicy = 'https://innomatica.github.io/sonore/privacy/';
+const urlSourceRepo = 'https://github.com/innomatica/sonore';
 const urlDisclaimer = 'https://innomatica.github.io/sonore/disclaimer/';
+const urlPrivacyPolicy = 'https://innomatica.github.io/sonore/privacy/';
 const urlDefalutArt =
     'https://raw.githubusercontent.com/innomatica/sonore/master/extra/data/sound_256.png';
 const urlStationsJson =
@@ -15,6 +16,7 @@ const pathDefaultStationImageAsset = 'assets/images/sound_512.png';
 const fileDefaultStationImage = 'station.png';
 
 const sleepTimeouts = [30, 20, 10, 5, 60];
+const maxSearchResult = 300;
 
 // asset images
 const playStoreUrlQrCode = 'assets/images/com.innomatic.sonoreapp.png';

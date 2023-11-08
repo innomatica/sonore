@@ -26,7 +26,7 @@ class _LabelManagerState extends State<LabelManager> {
           right: 12),
       child: TextFormField(
         decoration: InputDecoration(
-          label: const Text('Label Name'),
+          label: const Text('Category Name'),
           hintText: 'Daily Dose of Acid Jazz',
           suffix: IconButton(
             icon: const Icon(Icons.check),
@@ -51,7 +51,7 @@ class _LabelManagerState extends State<LabelManager> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Labels'),
+        title: const Text('Categories'),
       ),
       body: FutureBuilder<List<StationLabel>>(
           future: bloc.getLabels(query: {'orderBy': 'position'}),
@@ -112,7 +112,6 @@ class _LabelManagerState extends State<LabelManager> {
       // resizeToAvoidBottomInset: true,
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
-              child: const Icon(Icons.add_rounded),
               onPressed: () {
                 showModalBottomSheet(
                   isScrollControlled: true,
@@ -131,6 +130,11 @@ class _LabelManagerState extends State<LabelManager> {
                   }
                 });
               },
+              backgroundColor: Theme.of(context)
+                  .colorScheme
+                  .secondaryContainer
+                  .withOpacity(0.5),
+              child: const Icon(Icons.add_rounded),
             )
           : Container(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

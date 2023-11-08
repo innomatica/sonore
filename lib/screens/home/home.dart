@@ -2,22 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sonoreapp/screens/home/widgets.dart';
-import 'package:sonoreapp/services/station_api.dart';
-import 'package:url_launcher/url_launcher.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../logic/station.dart';
 import '../../models/label.dart';
 import '../../models/station.dart';
 import '../../services/audiohandler.dart';
-import '../../shared/constants.dart';
+import '../../services/station_api.dart';
 import '../../shared/settings.dart';
 import '../about/about.dart';
 import '../settings/label_manager.dart';
-import '../settings/station_search.dart';
-import 'instruction.dart';
 import 'station_details.dart';
+import 'widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,20 +34,21 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Sonore
-          Text(
-            appName,
-            style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.primary),
-          ),
+          // Text(
+          //   appName,
+          //   style: TextStyle(
+          //     fontWeight: FontWeight.w500,
+          //     color: Theme.of(context).colorScheme.primary,
+          //   ),
+          // ),
           const SizedBox(width: 10),
           // Label
           Icon(
-            Icons.label_outline_rounded,
-            size: 20,
+            Icons.label_rounded,
+            size: 24,
             color: Theme.of(context).colorScheme.tertiary,
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 10),
           _buildLabelMenu(context),
         ],
       ),
@@ -100,12 +96,7 @@ class _HomePageState extends State<HomePage> {
       return PopupMenuButton<String>(
         icon: const Icon(Icons.more_vert),
         onSelected: (value) {
-          if (value == 'Add New Stations') {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const StationSearch(),
-            ));
-            // .then((_) => setState(() {}));
-          } else if (value == 'Manage Labels') {
+          if (value == 'Manage Labels') {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const LabelManager(),
             ));
@@ -143,24 +134,13 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context) {
           return <PopupMenuEntry<String>>[
             PopupMenuItem(
-              value: "Add New Stations",
-              child: Row(
-                children: [
-                  Icon(Icons.cell_tower_rounded,
-                      color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 8),
-                  const Text('Add New Stations'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
               value: "Manage Labels",
               child: Row(
                 children: [
                   Icon(Icons.view_list_rounded,
                       color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 8),
-                  const Text('Manage Labels'),
+                  const Text('Manage Categories'),
                 ],
               ),
             ),
@@ -204,7 +184,7 @@ class _HomePageState extends State<HomePage> {
     final logic = context.watch<StationBloc>();
 
     return Card(
-      elevation: logic.currentStationId == station.uuid ? 8 : 0,
+      elevation: logic.currentStationId == station.uuid ? 16 : 0,
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 8),
         onTap: () {
@@ -230,7 +210,7 @@ class _HomePageState extends State<HomePage> {
           overflow: TextOverflow.fade,
           softWrap: false,
           style: const TextStyle(
-            fontSize: 16.0,
+            // fontSize: 16.0,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -241,8 +221,8 @@ class _HomePageState extends State<HomePage> {
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,
                 style: TextStyle(
-                  fontSize: 13.0,
-                  color: Theme.of(context).colorScheme.tertiary,
+                  // fontSize: 13.0,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               )
             : Text(
@@ -250,11 +230,10 @@ class _HomePageState extends State<HomePage> {
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,
                 style: const TextStyle(
-                  fontSize: 12.0,
+                  // fontSize: 12.0,
                   color: Colors.blueGrey,
                 ),
               ),
-
         // play button
         trailing: buildPlayButton(handler, station),
       ),
@@ -307,8 +286,10 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
-            decoration:
-                const InputDecoration(labelText: 'Enter search keyword'),
+            decoration: const InputDecoration(
+              labelText: 'Enter search keyword',
+              hintText: 'station name or tags',
+            ),
             onChanged: (text) => keyword = text,
           ),
           const SizedBox(height: 16.0),
@@ -355,6 +336,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.search_rounded, color: iconColor),
             label: const Text('Search By Tag(s)'),
           ),
+          const SizedBox(height: 8.0),
           TextButton.icon(
             onPressed: () {
               Navigator.pop(context);
@@ -365,7 +347,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
             icon: Icon(Icons.star_border_rounded, color: iconColor),
-            label: const Text('Top 100 Stations'),
+            label: const Text('Top $maxSearchResult Stations'),
           ),
           TextButton.icon(
             onPressed: () {
@@ -441,16 +423,13 @@ class _HomePageState extends State<HomePage> {
   //
   Widget _buildFloatingActionButton() {
     return FloatingActionButton(
-      onPressed: () {},
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => _buildSearchDialog(),
+      ),
       backgroundColor:
           Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5),
-      child: IconButton(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (context) => _buildSearchDialog(),
-        ),
-        icon: const Icon(Icons.add),
-      ),
+      child: const Icon(Icons.add),
     );
   }
 
@@ -463,7 +442,7 @@ class _HomePageState extends State<HomePage> {
         child: _buildStationList(),
       ),
       floatingActionButton: _buildFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

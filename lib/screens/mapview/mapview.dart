@@ -43,20 +43,13 @@ class _RadioBrowserMapState extends State<RadioBrowserMap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Text(
-              'Note Station Name',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            Text(
-              'Then use it for search',
-              style: TextStyle(
-                fontSize: 14.0,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ],
+        leadingWidth: 32.0,
+        title: Text(
+          'Find Station Name for Search',
+          style: TextStyle(
+            fontSize: 16.0,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
         ),
       ),
       body: WebViewWidget(controller: controller),

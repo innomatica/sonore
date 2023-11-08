@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:audio_service/audio_service.dart';
 import 'package:sonoreapp/shared/settings.dart';
 
-import '../shared/constants.dart';
-
 class Station {
   String uuid;
   String name;

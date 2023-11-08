@@ -93,22 +93,13 @@ class SonoreAudioHandler extends BaseAudioHandler {
 
   Future<void> playRadioStation(Station station) async {
     log('handler.playRadioStation: ${station.toMediaItem()}');
-    // if (_player.playing) {
-    //   // FIXME: this may not update notification data
-    //   await pause();
-
-    //   // this updates notification but generate platform exception
-    //   // await stop();
-    // }
-    // this type of source does not return duration
-    // debugPrint('uuid: ${station.uuid}');
     final mediaItem = station.toMediaItem();
     await stop();
     await _player.setAudioSource(
       AudioSource.uri(Uri.parse(station.url), tag: mediaItem),
     );
     queue.add([mediaItem]);
-    // report new station is playing
+    // report current station
     _logic.setCurrentStationId(station.uuid);
     await play();
   }
