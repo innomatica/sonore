@@ -91,7 +91,7 @@ class _StationDetailsState extends State<StationDetails> {
                     widget.station.info['tags'] = input;
                   }
                   await logic.updateStation(widget.station);
-                  if (mounted) {
+                  if (context.mounted) {
                     Navigator.pop(context);
                     setState(() {});
                   }
