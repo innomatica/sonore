@@ -285,14 +285,17 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // keyword
           TextField(
+            autofocus: true,
             decoration: const InputDecoration(
-              labelText: 'Enter search keyword',
-              hintText: 'station name or tags',
+              labelText: 'Enter keyword',
+              hintText: 'BBC, ambient, ...',
             ),
             onChanged: (text) => keyword = text,
           ),
           const SizedBox(height: 16.0),
+          // search by station name
           TextButton.icon(
             onPressed: () {
               if (keyword?.isNotEmpty == true) {
@@ -304,7 +307,7 @@ class _HomePageState extends State<HomePage> {
                     'name': keyword,
                     'limit': '300',
                     'hidebroken': 'true',
-                    'bitrateMin': '128'
+                    'bitrateMin': '64'
                   })),
                 );
               }
@@ -312,6 +315,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.search_rounded, color: iconColor),
             label: const Text('Search By Station Name'),
           ),
+          // search by tags
           TextButton.icon(
             onPressed: () {
               if (keyword?.isNotEmpty == true) {
@@ -336,7 +340,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.search_rounded, color: iconColor),
             label: const Text('Search By Tag(s)'),
           ),
-          const SizedBox(height: 8.0),
+          const Divider(indent: 30.0, endIndent: 30.0),
           TextButton.icon(
             onPressed: () {
               Navigator.pop(context);
@@ -367,7 +371,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.popAndPushNamed(context, '/map');
             },
             icon: Icon(Icons.map_rounded, color: iconColor),
-            label: const Text('Find Station Information'),
+            label: const Text('Get Station Name on the Map'),
           ),
         ],
       ),
@@ -380,6 +384,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSearchResult(Future<List<Station>> query) {
     final bloc = context.read<StationBloc>();
     return AlertDialog(
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 4.0, vertical: 12.0),
       content: SizedBox(
         width: double.maxFinite,
         child: FutureBuilder<List<Station>>(
@@ -391,21 +397,38 @@ class _HomePageState extends State<HomePage> {
                       itemCount: snapshot.data?.length,
                       itemBuilder: (context, index) => Card(
                         child: ListTile(
+                          visualDensity: VisualDensity.compact,
                           enabled: snapshot.data![index].state != 'registered',
                           onTap: () => bloc.addStation(snapshot.data![index]),
+                          leading: ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(5)),
+                            child: Image(
+                              image:
+                                  bloc.getStationImage(snapshot.data![index]),
+                              fit: BoxFit.fitWidth,
+                              width: 38.0,
+                              height: 38.0,
+                            ),
+                          ),
                           title: Text(
                             snapshot.data?[index].name ?? '',
+                            style: const TextStyle(fontSize: 16.0),
+                            maxLines: 1,
                           ),
                           subtitle: Text(
                             snapshot.data?[index].info['tags'] ?? '',
                             maxLines: 1,
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary),
+                              color: Theme.of(context).colorScheme.tertiary,
+                              fontSize: 12.0,
+                            ),
                           ),
                         ),
                       ),
                     )
-                  : const Center(child: Text("No Stations Found"))
+                  : const Center(
+                      child: Text("No Stations Found...\nTry again."))
               : const Center(
                   child: SizedBox(
                     width: 20,

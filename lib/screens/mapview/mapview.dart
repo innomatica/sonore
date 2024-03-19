@@ -45,7 +45,7 @@ class _RadioBrowserMapState extends State<RadioBrowserMap> {
       appBar: AppBar(
         leadingWidth: 32.0,
         title: Text(
-          'Find Station Name for Search',
+          'Find the Station Name for Search',
           style: TextStyle(
             fontSize: 16.0,
             color: Theme.of(context).colorScheme.tertiary,
