@@ -10,13 +10,14 @@ import '../models/station.dart';
 Future<SonoreAudioHandler> createAudioHandler() {
   return AudioService.init(
     builder: () => SonoreAudioHandler(),
-    config: AudioServiceConfig(
+    config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.innomatic.sonore.channel.audio',
       androidNotificationChannelName: 'Sonore playback',
       androidNotificationOngoing: true,
       // this will keep the foreground on during pause
       // check: https://pub.dev/packages/audio_service
-      androidStopForegroundOnPause: false,
+      // androidStopForegroundOnPause: false,
+      androidStopForegroundOnPause: true,
       androidNotificationIcon: 'drawable/app_icon',
     ),
   );
